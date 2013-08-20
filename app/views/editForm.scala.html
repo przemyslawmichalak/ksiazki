@@ -1,0 +1,34 @@
+@(id: Long, computerForm: Form[Computer])
+
+@import helper._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+@main {
+    
+    <h1>Edit computer</h1>
+    
+    @form(routes.Application.update(id)) {
+        
+        <fieldset>
+        
+            @inputText(computerForm("tytul"), '_label -> "Tytuł")
+            @inputText(computerForm("autor"), '_label -> "Autor")
+            @inputText(computerForm("data"), '_label -> "data")
+            @inputText(computerForm("opinia"), '_label -> "Opinia")
+            @inputText(computerForm("ocena"), '_label -> "Ocena")
+            @inputText(computerForm("stron"), '_label -> "Stron")
+        </fieldset>
+        
+        <div class="actions">
+            <input type="submit" value="Save this computer" class="btn primary"> or 
+            <a href="@routes.Application.list()" class="btn">Cancel</a> 
+        </div>
+        
+    }
+    
+    @form(routes.Application.delete(id), 'class -> "topRight") {
+        <input type="submit" value="Delete this computer" class="btn danger">
+    }
+    
+}

@@ -1,0 +1,121 @@
+@(currentPage: Page[(Computer)], currentOrderBy: Int, currentFilter: String)(implicit flash: play.api.mvc.Flash)
+
+@****************************************
+* Helper generating navigation links    *
+****************************************@
+@link(newPage: Int, newOrderBy: Option[Int] = None) = @{
+    routes.Application.list(newPage, newOrderBy.map { orderBy =>
+        if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
+    }.getOrElse(currentOrderBy), currentFilter)
+    
+}
+
+@**********************************
+* Helper generating table headers *
+***********************************@
+@header(orderBy: Int, title: String) = {
+    <th class="col@orderBy header @if(scala.math.abs(currentOrderBy) == orderBy) @{if(currentOrderBy < 0) "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, Some(orderBy))">@title</a>
+    </th>
+}
+
+@main {
+    
+    <h1>Znaleziono @currentPage.total książki</h1>
+
+    @flash.get("success").map { message =>
+        <div class="alert-message warning">
+            <strong>Skonczone!</strong> @message
+        </div>
+    }
+
+    <div id="actions">
+        
+        @helper.form(action=routes.Application.list()) {
+            <input type="search" id="searchbox" name="f" value="@currentFilter" placeholder="Sortuj po tytule...">
+            <input type="submit" id="searchsubmit" value="Sortuj po tytule" class="btn primary">
+        }
+        
+        <a class="btn success" id="add" href="@routes.Application.create()">Dodaj ksiazke</a>
+        
+    </div>
+    
+    @Option(currentPage.items).filterNot(_.isEmpty).map { computers =>
+        
+        <table class="computers zebra-striped">
+            <thead>
+                <tr>
+                    @header(2, "Tytul")
+                    @header(3, "Autor")
+                    @header(4, "Data")
+                    @header(5, "Opinia")
+                    @header(6, "Ocena")
+                    @header(7, "Stron")
+                </tr>
+            </thead>
+            <tbody>
+
+                @computers.map { 
+                    case (computer) => {
+                        <tr>
+                            <td><a href="@routes.Application.edit(computer.id.get)">@computer.tytul</a></td>
+                            <td>
+                                @computer.autor
+                            </td>
+                            <td>
+                                @computer.data.map(_.format("dd MMM yyyy")).getOrElse { <em>-</em> }
+                            </td>
+                            <td>
+                                @computer.opinia
+                            </td>
+                            <td>
+                                @computer.ocena
+                            </td>
+                            <td>
+                                @computer.stron
+                            </td>                                                     
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @currentPage.prev.map { page =>
+                    <li class="prev">
+                        <a href="@link(page)">&larr; Poprzednia</a>
+                    </li> 
+                }.getOrElse {
+                    <li class="prev disabled">
+                        <a>&larr; Poprzednia</a>
+                    </li>
+                }
+                <li class="current">
+                    <a>Displaying @(currentPage.offset + 1) z @(currentPage.offset + computers.size) na @currentPage.total</a>
+                </li>
+                @currentPage.next.map { page =>
+                    <li class="next">
+                        <a href="@link(page)">Nastepna &rarr;</a>
+                    </li> 
+                }.getOrElse {
+                    <li class="next disabled">
+                        <a>Nastepna &rarr;</a>
+                    </li>
+                }
+            </ul>
+        </div>
+        
+    }.getOrElse {
+        
+        <div class="well">
+            <em>Nic tu nie ma</em>
+        </div>
+        
+    }
+
+        
+}
+
+            
